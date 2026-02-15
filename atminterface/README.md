@@ -4,7 +4,7 @@ Full-stack ATM app with a Spring Boot backend and a vanilla JavaScript frontend.
 
 ## Tech Stack
 - Backend: Spring Boot 3.x, Java 21, REST API
-- DB: H2 (default local dev), PostgreSQL compatible schema
+- DB: PostgreSQL (default local dev/runtime)
 - Migrations: Flyway
 - Frontend: HTML, CSS, Vanilla JS (SPA hide/show screens)
 - Auth: card number + PIN login with session token (`X-Session-Token`)
@@ -16,6 +16,17 @@ Full-stack ATM app with a Spring Boot backend and a vanilla JavaScript frontend.
 - `atm`: ATM operations and endpoints
 - `common`: API response wrapper, config, security/session, global exception handling
 - `frontend/`: ATM UI (`index.html`, `styles.css`, `app.js`)
+
+## Database (PostgreSQL)
+Default connection settings (overridable with env vars):
+- `DB_URL=jdbc:postgresql://localhost:5432/atmdb`
+- `DB_USERNAME=postgres`
+- `DB_PASSWORD=postgres`
+
+Example local setup with Docker:
+```bash
+docker run --name atm-postgres -e POSTGRES_DB=atmdb -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16
+```
 
 ## Run Backend
 ```bash
