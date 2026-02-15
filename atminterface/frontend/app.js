@@ -3,24 +3,18 @@ const state = { token: null, cardNumber: null, fullName: null };
 function resolveApiBase() {
   const { protocol, hostname, port, origin } = window.location;
   const isHttp = protocol === 'http:' || protocol === 'https:';
-  const isLocalhost = ['localhost', '127.0.0.1'].includes(hostname);
 
   // When opening index.html directly (file://), use the local backend.
   if (!isHttp) {
     return 'http://localhost:8080/api';
   }
 
-  if (isHttp && isLocalhost && port === '8080') {
+  if (port === '8080') {
     return `${origin}/api`;
   }
 
-  // Most local frontend servers run on a different port (e.g. 5500/5173).
-  // In that case, point directly at the Spring Boot backend.
-  if (isLocalhost) {
-    return `http://${hostname}:8080/api`;
-  }
-
-  return `${origin}/api`;
+  // For frontend dev servers running on a different port, call the backend host on 8080.
+  return `${protocol}//${hostname}:8080/api`;
 }
 
 const apiBase = resolveApiBase();
