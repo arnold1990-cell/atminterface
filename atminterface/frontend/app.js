@@ -5,6 +5,11 @@ function resolveApiBase() {
   const isHttp = protocol === 'http:' || protocol === 'https:';
   const isLocalhost = ['localhost', '127.0.0.1'].includes(hostname);
 
+  // When opening index.html directly (file://), use the local backend.
+  if (!isHttp) {
+    return 'http://localhost:8080/api';
+  }
+
   if (isHttp && isLocalhost && port === '8080') {
     return `${origin}/api`;
   }
@@ -12,7 +17,7 @@ function resolveApiBase() {
   // Most local frontend servers run on a different port (e.g. 5500/5173).
   // In that case, point directly at the Spring Boot backend.
   if (isLocalhost) {
-    return `${protocol}//${hostname}:8080/api`;
+    return `http://${hostname}:8080/api`;
   }
 
   return `${origin}/api`;
@@ -35,11 +40,16 @@ function showMessage(title, text) {
 
 async function callApi(path, method = 'GET', body) {
   setStatus('Loading...');
-  const res = await fetch(`${apiBase}${path}`, {
-    method,
-    headers: { 'Content-Type': 'application/json', 'X-Session-Token': state.token || '' },
-    body: body ? JSON.stringify(body) : undefined
-  });
+  let res;
+  try {
+    res = await fetch(`${apiBase}${path}`, {
+      method,
+      headers: { 'Content-Type': 'application/json', 'X-Session-Token': state.token || '' },
+      body: body ? JSON.stringify(body) : undefined
+    });
+  } catch (err) {
+    throw new Error(`Unable to reach API at ${apiBase}. Make sure the backend is running on port 8080.`);
+  }
   const contentType = res.headers.get('content-type') || '';
   if (!contentType.includes('application/json')) {
     const responseText = await res.text();
