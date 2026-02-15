@@ -1,23 +1,48 @@
-const state = { token: null, cardNumber: null, fullName: null };
+const state = { token: null, cardNumber: null, fullName: null, apiBase: null };
 
-function resolveApiBase() {
+function resolveApiBases() {
   const { protocol, hostname, port, origin } = window.location;
   const isHttp = protocol === 'http:' || protocol === 'https:';
+  const configuredBase = new URLSearchParams(window.location.search).get('apiBase');
+
+  const bases = [];
+  const addBase = (base) => {
+    if (!base || bases.includes(base)) return;
+    bases.push(base);
+  };
+
+  // Allow forcing a backend URL for remote previews.
+  addBase(configuredBase);
+
+  const savedBase = localStorage.getItem('atm.apiBase');
+  addBase(savedBase);
 
   // When opening index.html directly (file://), use the local backend.
   if (!isHttp) {
-    return 'http://localhost:8080/api';
+    addBase('http://localhost:8080/api');
+    addBase('http://127.0.0.1:8080/api');
+    return bases;
   }
 
+  addBase(`${origin}/api`);
+
   if (port === '8080') {
-    return `${origin}/api`;
+    return bases;
   }
 
   // For frontend dev servers running on a different port, call the backend host on 8080.
-  return `${protocol}//${hostname}:8080/api`;
+  addBase(`${protocol}//${hostname}:8080/api`);
+  addBase(`${protocol}//localhost:8080/api`);
+  addBase(`${protocol}//127.0.0.1:8080/api`);
+  return bases;
 }
 
-const apiBase = resolveApiBase();
+const apiBases = resolveApiBases();
+
+function getApiBasesInPriorityOrder() {
+  if (!state.apiBase) return apiBases;
+  return [state.apiBase, ...apiBases.filter(base => base !== state.apiBase)];
+}
 
 const views = [...document.querySelectorAll('.view')];
 const statusText = document.getElementById('status');
@@ -34,16 +59,27 @@ function showMessage(title, text) {
 
 async function callApi(path, method = 'GET', body) {
   setStatus('Loading...');
-  let res;
-  try {
-    res = await fetch(`${apiBase}${path}`, {
+  let res = null;
+  for (const base of getApiBasesInPriorityOrder()) {
+    try {
+      res = await fetch(`${base}${path}`, {
       method,
       headers: { 'Content-Type': 'application/json', 'X-Session-Token': state.token || '' },
       body: body ? JSON.stringify(body) : undefined
     });
-  } catch (err) {
-    throw new Error(`Unable to reach API at ${apiBase}. Make sure the backend is running on port 8080.`);
+
+      state.apiBase = base;
+      localStorage.setItem('atm.apiBase', base);
+      break;
+    } catch (err) {
+      // Try the next candidate base URL.
+    }
   }
+
+  if (!res) {
+    throw new Error(`Unable to reach API. Tried: ${apiBases.join(', ')}. Make sure the backend is running and reachable.`);
+  }
+
   const contentType = res.headers.get('content-type') || '';
   if (!contentType.includes('application/json')) {
     const responseText = await res.text();
