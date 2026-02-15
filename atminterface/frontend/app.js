@@ -60,35 +60,42 @@ function showMessage(title, text) {
 async function callApi(path, method = 'GET', body) {
   setStatus('Loading...');
   let res = null;
+  let lastError = null;
+  const requestBody = body ? JSON.stringify(body) : undefined;
+
   for (const base of getApiBasesInPriorityOrder()) {
     try {
       res = await fetch(`${base}${path}`, {
-      method,
-      headers: { 'Content-Type': 'application/json', 'X-Session-Token': state.token || '' },
-      body: body ? JSON.stringify(body) : undefined
-    });
+        method,
+        headers: { 'Content-Type': 'application/json', 'X-Session-Token': state.token || '' },
+        body: requestBody
+      });
+
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        const responseText = await res.text();
+        const trimmed = responseText.trimStart().toLowerCase();
+        const isHtml = trimmed.startsWith('<!doctype html') || trimmed.startsWith('<html');
+        if (isHtml) {
+          lastError = new Error(`API base ${base} returned HTML; trying next API base.`);
+          continue;
+        }
+
+        throw new Error('API request returned a non-JSON response.');
+      }
 
       state.apiBase = base;
       localStorage.setItem('atm.apiBase', base);
       break;
     } catch (err) {
+      lastError = err;
       // Try the next candidate base URL.
     }
   }
 
   if (!res) {
+    if (lastError) throw lastError;
     throw new Error(`Unable to reach API. Tried: ${apiBases.join(', ')}. Make sure the backend is running and reachable.`);
-  }
-
-  const contentType = res.headers.get('content-type') || '';
-  if (!contentType.includes('application/json')) {
-    const responseText = await res.text();
-    const isHtml = responseText.trimStart().startsWith('<!doctype html') || responseText.trimStart().startsWith('<html');
-    throw new Error(
-      isHtml
-        ? 'API request returned HTML instead of JSON. Verify that the frontend points to the backend API.'
-        : 'API request returned a non-JSON response.'
-    );
   }
 
   const json = await res.json();
