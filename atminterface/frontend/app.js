@@ -60,14 +60,29 @@ function showMessage(title, text) {
 async function callApi(path, method = 'GET', body) {
   setStatus('Loading...');
   let res = null;
+  let nonJsonError = null;
   for (const base of getApiBasesInPriorityOrder()) {
     try {
-      res = await fetch(`${base}${path}`, {
-      method,
-      headers: { 'Content-Type': 'application/json', 'X-Session-Token': state.token || '' },
-      body: body ? JSON.stringify(body) : undefined
-    });
+      const candidate = await fetch(`${base}${path}`, {
+        method,
+        headers: { 'Content-Type': 'application/json', 'X-Session-Token': state.token || '' },
+        body: body ? JSON.stringify(body) : undefined
+      });
 
+      const contentType = candidate.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        const responseText = await candidate.text();
+        const trimmed = responseText.trimStart().toLowerCase();
+        const isHtml = trimmed.startsWith('<!doctype html') || trimmed.startsWith('<html');
+        nonJsonError = new Error(
+          isHtml
+            ? 'API request returned HTML instead of JSON. Verify that the frontend points to the backend API.'
+            : 'API request returned a non-JSON response.'
+        );
+        continue;
+      }
+
+      res = candidate;
       state.apiBase = base;
       localStorage.setItem('atm.apiBase', base);
       break;
@@ -77,18 +92,10 @@ async function callApi(path, method = 'GET', body) {
   }
 
   if (!res) {
+    if (nonJsonError) {
+      throw nonJsonError;
+    }
     throw new Error(`Unable to reach API. Tried: ${apiBases.join(', ')}. Make sure the backend is running and reachable.`);
-  }
-
-  const contentType = res.headers.get('content-type') || '';
-  if (!contentType.includes('application/json')) {
-    const responseText = await res.text();
-    const isHtml = responseText.trimStart().startsWith('<!doctype html') || responseText.trimStart().startsWith('<html');
-    throw new Error(
-      isHtml
-        ? 'API request returned HTML instead of JSON. Verify that the frontend points to the backend API.'
-        : 'API request returned a non-JSON response.'
-    );
   }
 
   const json = await res.json();
