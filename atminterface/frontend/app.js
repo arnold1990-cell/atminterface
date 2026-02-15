@@ -1,10 +1,21 @@
 const state = { token: null, cardNumber: null, fullName: null };
 
 function resolveApiBase() {
-  if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
-    return `${window.location.origin}/api`;
+  const { protocol, hostname, port, origin } = window.location;
+  const isHttp = protocol === 'http:' || protocol === 'https:';
+  const isLocalhost = ['localhost', '127.0.0.1'].includes(hostname);
+
+  if (isHttp && isLocalhost && port === '8080') {
+    return `${origin}/api`;
   }
-  return 'http://localhost:8080/api';
+
+  // Most local frontend servers run on a different port (e.g. 5500/5173).
+  // In that case, point directly at the Spring Boot backend.
+  if (isLocalhost) {
+    return `${protocol}//${hostname}:8080/api`;
+  }
+
+  return `${origin}/api`;
 }
 
 const apiBase = resolveApiBase();
@@ -29,6 +40,17 @@ async function callApi(path, method = 'GET', body) {
     headers: { 'Content-Type': 'application/json', 'X-Session-Token': state.token || '' },
     body: body ? JSON.stringify(body) : undefined
   });
+  const contentType = res.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    const responseText = await res.text();
+    const isHtml = responseText.trimStart().startsWith('<!doctype html') || responseText.trimStart().startsWith('<html');
+    throw new Error(
+      isHtml
+        ? 'API request returned HTML instead of JSON. Verify that the frontend points to the backend API.'
+        : 'API request returned a non-JSON response.'
+    );
+  }
+
   const json = await res.json();
   setStatus(json.message || 'Ready');
   if (!json.success) throw new Error(json.message || 'Operation failed');
