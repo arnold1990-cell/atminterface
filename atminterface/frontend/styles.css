@@ -1,0 +1,15 @@
+body { margin: 0; font-family: Arial, sans-serif; background: #0b1020; color: #e6edf3; }
+.atm-shell { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.screen { width: min(420px, 95vw); background: #111a2d; border-radius: 14px; padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+header { text-align: center; margin-bottom: .75rem; }
+.view { display: none; }
+.view.active { display: block; }
+input, button { width: 100%; margin: .35rem 0; padding: .7rem; border-radius: 8px; border: 1px solid #2c3e63; background: #0f1728; color: #fff; }
+button { cursor: pointer; background: #1f6feb; border: none; }
+button:hover { background: #2b7fff; }
+.row { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+.menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .5rem; }
+table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+th, td { border-bottom: 1px solid #263248; padding: .4rem; text-align: left; }
+@media (max-width: 420px) { .menu-grid { grid-template-columns: 1fr; } .row { grid-template-columns: 1fr; } }
