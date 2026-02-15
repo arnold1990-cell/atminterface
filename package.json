@@ -1,0 +1,12 @@
+{
+  "name": "atminterface-dev-tools",
+  "private": true,
+  "scripts": {
+    "frontend:dev": "vite --root atminterface/frontend --host 0.0.0.0 --port 5173",
+    "frontend:build": "vite build --root atminterface/frontend --outDir ../dist",
+    "frontend:preview": "vite preview --host 0.0.0.0 --port 4173"
+  },
+  "devDependencies": {
+    "vite": "^5.4.14"
+  }
+}

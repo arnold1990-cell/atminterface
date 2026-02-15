@@ -36,8 +36,14 @@ docker run --name atm-postgres -e POSTGRES_DB=atmdb -e POSTGRES_USER=postgres -e
 Backend base URL: `http://localhost:8080`
 
 ## Run Frontend
-- Open `frontend/index.html` directly in a browser, or
-- Use a static server / VSCode Live Server.
+From the repository root (`/workspace/atminterface`):
+```bash
+npm install
+npm run frontend:dev
+```
+Then open `http://localhost:5173`.
+
+You can still open `frontend/index.html` directly in a browser, or use VSCode Live Server, but the Vite script above is the recommended local workflow.
 
 Frontend expects backend at `http://localhost:8080`.
 
