@@ -1,5 +1,13 @@
 const state = { token: null, cardNumber: null, fullName: null };
-const apiBase = 'http://localhost:8080/api';
+
+function resolveApiBase() {
+  if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+    return `${window.location.origin}/api`;
+  }
+  return 'http://localhost:8080/api';
+}
+
+const apiBase = resolveApiBase();
 
 const views = [...document.querySelectorAll('.view')];
 const statusText = document.getElementById('status');
