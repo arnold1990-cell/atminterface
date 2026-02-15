@@ -7,74 +7,135 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<div class="atm-shell">
-  <div class="screen">
-    <header><h1>ATM</h1><p id="status">Welcome</p></header>
+<div class="atm-wrapper">
+  <div class="atm-machine">
+    <div class="atm-top">
+      <div class="camera-dot" aria-hidden="true"></div>
+      <p class="bank-title">Secure Banking ATM</p>
+    </div>
 
-    <section id="welcome" class="view active">
-      <h2>Insert Card</h2>
-      <input id="cardNumber" placeholder="Enter 16-digit card number" maxlength="16" />
-      <button data-action="to-pin">Continue</button>
-    </section>
+    <div class="atm-body">
+      <aside class="side-buttons left">
+        <button class="side-btn" data-action="menu">◀</button>
+        <button class="side-btn" data-action="balance">◀</button>
+        <button class="side-btn" data-action="statement">◀</button>
+      </aside>
 
-    <section id="pin" class="view">
-      <h2>Enter PIN</h2>
-      <input id="pinInput" type="password" maxlength="4" readonly />
-      <div id="keypad" class="keypad"></div>
-      <div class="row"><button data-action="clear-pin">Clear</button><button data-action="back-pin">Backspace</button><button data-action="login">Login</button></div>
-    </section>
+      <main class="screen-bezel">
+        <section class="screen" role="application" aria-label="ATM screen">
+          <header class="screen-header">
+            <h1>ATM</h1>
+            <p id="status">Welcome</p>
+          </header>
 
-    <section id="menu" class="view">
-      <h2>Main Menu</h2>
-      <div class="menu-grid">
-        <button data-action="balance">Balance Inquiry</button>
-        <button data-action="withdraw-view">Withdraw Cash</button>
-        <button data-action="deposit-view">Deposit</button>
-        <button data-action="transfer-view">Transfer</button>
-        <button data-action="statement">Mini Statement</button>
-        <button data-action="change-pin-view">Change PIN</button>
-        <button data-action="exit">Exit</button>
+          <section id="welcome" class="view active">
+            <h2>Insert Card</h2>
+            <input id="cardNumber" placeholder="Enter 16-digit card number" maxlength="16" />
+            <button data-action="to-pin">Continue</button>
+          </section>
+
+          <section id="pin" class="view">
+            <h2>Enter PIN</h2>
+            <input id="pinInput" type="password" maxlength="4" readonly />
+            <div id="keypad" class="keypad"></div>
+            <div class="row">
+              <button data-action="clear-pin">Clear</button>
+              <button data-action="back-pin">Backspace</button>
+              <button data-action="login">Login</button>
+            </div>
+          </section>
+
+          <section id="menu" class="view">
+            <h2>Main Menu</h2>
+            <div class="menu-grid">
+              <button data-action="balance">Balance Inquiry</button>
+              <button data-action="withdraw-view">Withdraw Cash</button>
+              <button data-action="deposit-view">Deposit</button>
+              <button data-action="transfer-view">Transfer</button>
+              <button data-action="statement">Mini Statement</button>
+              <button data-action="change-pin-view">Change PIN</button>
+              <button data-action="exit">Exit</button>
+            </div>
+          </section>
+
+          <section id="balance" class="view">
+            <h2>Balance</h2>
+            <p id="balanceText"></p>
+            <button data-action="menu">Back</button>
+          </section>
+
+          <section id="withdraw" class="view">
+            <h2>Withdraw</h2>
+            <div class="menu-grid">
+              <button data-quick="50">50</button>
+              <button data-quick="100">100</button>
+              <button data-quick="200">200</button>
+              <button data-quick="500">500</button>
+              <button data-quick="1000">1000</button>
+            </div>
+            <input id="withdrawAmount" placeholder="Custom amount" type="number" min="10" step="10" />
+            <button data-action="withdraw-custom">Withdraw</button>
+            <button data-action="menu">Back</button>
+          </section>
+
+          <section id="deposit" class="view">
+            <h2>Deposit</h2>
+            <input id="depositAmount" type="number" min="1" step="0.01" placeholder="Amount" />
+            <button data-action="deposit">Submit</button>
+            <button data-action="menu">Back</button>
+          </section>
+
+          <section id="transfer" class="view">
+            <h2>Transfer</h2>
+            <input id="beneficiary" placeholder="Beneficiary account number" />
+            <input id="transferAmount" type="number" min="1" step="0.01" placeholder="Amount" />
+            <button data-action="transfer">Submit</button>
+            <button data-action="menu">Back</button>
+          </section>
+
+          <section id="statement" class="view">
+            <h2>Mini Statement</h2>
+            <table>
+              <thead>
+              <tr><th>Type</th><th>Amount</th><th>Time</th></tr>
+              </thead>
+              <tbody id="statementBody"></tbody>
+            </table>
+            <button data-action="menu">Back</button>
+          </section>
+
+          <section id="change-pin" class="view">
+            <h2>Change PIN</h2>
+            <input id="oldPin" type="password" maxlength="4" placeholder="Old PIN" />
+            <input id="newPin" type="password" maxlength="4" placeholder="New PIN" />
+            <button data-action="change-pin">Update PIN</button>
+            <button data-action="menu">Back</button>
+          </section>
+
+          <section id="message" class="view">
+            <h2 id="messageTitle">Result</h2>
+            <p id="messageText"></p>
+            <button data-action="menu">Main Menu</button>
+          </section>
+        </section>
+
+        <div class="cash-slot" aria-label="Cash slot">
+          <span>Cash Dispenser</span>
+        </div>
+      </main>
+
+      <aside class="side-buttons right">
+        <button class="side-btn" data-action="withdraw-view">▶</button>
+        <button class="side-btn" data-action="deposit-view">▶</button>
+        <button class="side-btn" data-action="exit">▶</button>
+      </aside>
+    </div>
+
+    <div class="atm-footer">
+      <div class="card-slot" aria-label="Card slot">
+        <span>Insert Card</span>
       </div>
-    </section>
-
-    <section id="balance" class="view"><h2>Balance</h2><p id="balanceText"></p><button data-action="menu">Back</button></section>
-
-    <section id="withdraw" class="view">
-      <h2>Withdraw</h2>
-      <div class="menu-grid">
-        <button data-quick="50">50</button><button data-quick="100">100</button><button data-quick="200">200</button><button data-quick="500">500</button><button data-quick="1000">1000</button>
-      </div>
-      <input id="withdrawAmount" placeholder="Custom amount" type="number" min="10" step="10" />
-      <button data-action="withdraw-custom">Withdraw</button><button data-action="menu">Back</button>
-    </section>
-
-    <section id="deposit" class="view">
-      <h2>Deposit</h2>
-      <input id="depositAmount" type="number" min="1" step="0.01" placeholder="Amount" />
-      <button data-action="deposit">Submit</button><button data-action="menu">Back</button>
-    </section>
-
-    <section id="transfer" class="view">
-      <h2>Transfer</h2>
-      <input id="beneficiary" placeholder="Beneficiary account number" />
-      <input id="transferAmount" type="number" min="1" step="0.01" placeholder="Amount" />
-      <button data-action="transfer">Submit</button><button data-action="menu">Back</button>
-    </section>
-
-    <section id="statement" class="view">
-      <h2>Mini Statement</h2>
-      <table><thead><tr><th>Type</th><th>Amount</th><th>Time</th></tr></thead><tbody id="statementBody"></tbody></table>
-      <button data-action="menu">Back</button>
-    </section>
-
-    <section id="change-pin" class="view">
-      <h2>Change PIN</h2>
-      <input id="oldPin" type="password" maxlength="4" placeholder="Old PIN" />
-      <input id="newPin" type="password" maxlength="4" placeholder="New PIN" />
-      <button data-action="change-pin">Update PIN</button><button data-action="menu">Back</button>
-    </section>
-
-    <section id="message" class="view"><h2 id="messageTitle">Result</h2><p id="messageText"></p><button data-action="menu">Main Menu</button></section>
+    </div>
   </div>
 </div>
 <script src="app.js"></script>
